@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CallFollow — Outbound Call & Follow-Up Tracker</title>
+  <meta name="description" content="A lightweight call & follow-up management tool for sales and service specialists. Track outbound calls, never miss a follow-up." />
+  <link rel="stylesheet" href="./assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="#" class="brand">Call<span>Follow</span></a>
+      <nav class="nav">
+        <button class="nav-tab active" data-view="dashboard">Dashboard</button>
+        <button class="nav-tab" data-view="log">Call Log</button>
+        <button class="nav-tab" data-view="queue">Follow-Up Queue</button>
+      </nav>
+      <button class="btn btn-primary" id="addCallBtn">+ Add Call</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ============ DASHBOARD VIEW ============ -->
+    <section id="view-dashboard" class="view active">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p id="todayLabel">Today's outreach at a glance</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" id="seedBtn">Load demo data</button>
+          <button class="btn btn-ghost" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div class="kpi-row" id="kpiRow"><!-- KPI cards injected --></div>
+
+      <div class="charts-row">
+        <div class="card chart-card">
+          <h3>Call outcomes</h3>
+          <div class="chart-wrap"><canvas id="outcomeChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Follow-up status</h3>
+          <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <h3>Calls by campaign</h3>
+          <div class="chart-wrap"><canvas id="campaignChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Today's follow-up queue</h3>
+          <span class="muted" id="queueCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="queueTable">
+            <thead>
+              <tr>
+                <th>Priority</th><th>Client</th><th>Phone</th><th>Campaign</th>
+                <th>Last outcome</th><th>Follow-up</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CALL LOG VIEW ============ -->
+    <section id="view-log" class="view">
+      <div class="page-head">
+        <div>
+          <h1>Call Log</h1>
+          <p>Every outbound call and its outcome, in one place.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" id="exportCsvBtn">Export CSV</button>
+          <button class="btn btn-primary" id="addCallBtn2">+ Add Call</button>
+        </div>
+      </div>
+
+      <div class="filters card">
+        <input type="search" id="searchInput" placeholder="Search client, phone, notes…" />
+        <select id="filterCampaign"><option value="">All campaigns</option></select>
+        <select id="filterOutcome"><option value="">All outcomes</option></select>
+        <select id="filterStatus"><option value="">All statuses</option></select>
+        <span class="muted" id="logCount"></span>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table" id="logTable">
+            <thead>
+              <tr>
+                <th>Call Date</th><th>Client</th><th>Phone</th><th>Campaign</th>
+                <th>Type</th><th>Outcome</th><th>Follow-Up</th><th>Priority</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FOLLOW-UP QUEUE VIEW ============ -->
+    <section id="view-queue" class="view">
+      <div class="page-head">
+        <div>
+          <h1>Follow-Up Queue</h1>
+          <p>Everyone you promised to call back — sorted by most overdue first.</p>
+        </div>
+      </div>
+      <div class="alert info" id="queueHint">Showing follow-ups that are due today or overdue. Complete a follow-up to move it off the queue.</div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table" id="queueFullTable">
+            <thead>
+              <tr>
+                <th>Priority</th><th>Client</th><th>Phone</th><th>Campaign</th>
+                <th>Last call</th><th>Last outcome</th><th>Follow-up</th><th>Days overdue</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ ADD/EDIT MODAL ============ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="modalTitle">Add Call</h2>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <form id="callForm">
+        <input type="hidden" id="callId" />
+        <div class="form-grid">
+          <div class="field">
+            <label for="f_client">Client name *</label>
+            <input id="f_client" required maxlength="60" />
+          </div>
+          <div class="field">
+            <label for="f_phone">Phone</label>
+            <input id="f_phone" maxlength="20" placeholder="(555) 123-4567" />
+          </div>
+          <div class="field">
+            <label for="f_campaign">Campaign</label>
+            <select id="f_campaign"></select>
+          </div>
+          <div class="field">
+            <label for="f_callType">Call type</label>
+            <select id="f_callType">
+              <option>Outbound Sales</option>
+              <option>Promotion</option>
+              <option>Follow-Up</option>
+              <option>Service</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_callDate">Call date *</label>
+            <input type="date" id="f_callDate" required />
+          </div>
+          <div class="field">
+            <label for="f_outcome">Outcome</label>
+            <select id="f_outcome">
+              <option>No Answer</option>
+              <option>Left Voicemail</option>
+              <option>Callback Scheduled</option>
+              <option>Interested</option>
+              <option>Not Interested</option>
+              <option>Converted</option>
+              <option>Do Not Call</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_followUpDate">Follow-up date</label>
+            <input type="date" id="f_followUpDate" />
+          </div>
+          <div class="field">
+            <label for="f_priority">Priority</label>
+            <select id="f_priority">
+              <option>High</option>
+              <option selected>Medium</option>
+              <option>Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_assigned">Assigned to</label>
+            <input id="f_assigned" maxlength="40" />
+          </div>
+          <div class="field full">
+            <label for="f_notes">Notes</label>
+            <textarea id="f_notes" rows="2" maxlength="300"></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save call</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">CallFollow · Outbound call & follow-up tracker · Built with HTML, CSS, JavaScript &amp; Chart.js · Sample data only</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="./assets/js/utils.js"></script>
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>
