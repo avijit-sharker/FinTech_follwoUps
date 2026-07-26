@@ -10,7 +10,7 @@ A call tracking dashboard for sales & service specialists. Log outbound calls, s
 
 Built to solve a real workplace problem: **when you're juggling dozens of callbacks, it's easy to overlook someone you promised to call back.** This tool makes sure that doesn't happen.
 
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./dashboard.png)
 
 **HTML** · **CSS** · **JavaScript** · **Chart.js** · **Excel** · **openpyxl**
 
@@ -43,9 +43,14 @@ This project showcases abilities relevant to a **business analyst / associate an
 - **Front-end development** — HTML, CSS, vanilla JS, Chart.js, localStorage
 - **Process improvement** — replacing ad-hoc tracking with a prioritized, auditable system
 
-![Excel Dashboard](./screenshots/excel-dashboard.png)
+![Excel Dashboard](./excel-dashboard.png)
 
 ---
+## Data Schema
+Both the web app and Excel template share this exact schema (CSV is the bridge):
+
+![Data Schema](./call-log.png)
+
 
 
 <div align="center">
